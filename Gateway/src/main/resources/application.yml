@@ -1,26 +1,39 @@
 spring:
-
   main:
     web-application-type: reactive
-
-  cloud:
-    gateway:
-      routes:
-        - id: auth-service  # 인증 서비스로 라우팅
-          uri: http://localhost:8081
-          predicates:
-            - Path=/auth/**  # 로그인 및 회원 가입 경로
-        - id: review-service
-          uri: http://localhost:8082
-          predicates:
-            - Path=/review/**
-        - id: sns-service
-          uri: http://localhost:8083
-          predicates:
-            - Path=/sns/**
 
   application:
     name: gateway
 
+  cloud:
+    gateway:
+      default-filters:
+        - PreserveHostHeader  # Host 헤더 유지
+
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - OPTIONS
+              - PUT
+              - DELETE
+              - PATCH
+            allowedHeaders:
+              - "*"
+
+      routes:
+        - id: server-service  # 인증 서비스로 라우팅
+          uri: http://localhost:8081  # 실제 인증 서비스 URI
+          predicates:
+            - Path=/user/**  # '/user/'로 시작하는 모든 경로 매칭
+
 server:
   port: 8080  # Gateway의 포트
+
+logging:
+  level:
+    org.springframework.cloud.gateway.filter: DEBUG
+    org.springframework.cloud.gateway: DEBUG
